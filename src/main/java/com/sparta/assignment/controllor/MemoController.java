@@ -3,9 +3,11 @@ package com.sparta.assignment.controllor;
 import com.sparta.assignment.dto.MemoRequestDto;
 import com.sparta.assignment.dto.MemoResponseDto;
 import com.sparta.assignment.entity.Memo;
+import com.sparta.assignment.security.UserDetailsImpl;
 import com.sparta.assignment.service.MemoService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -24,8 +26,8 @@ public class MemoController {
 
 
     @PostMapping("/api/memos")// 쿠키값 헤더 부분에 담긴 토큰과 작성내용 가져오기
-    public Memo createMemo(@RequestBody MemoRequestDto requestDto, HttpServletRequest request){
-        return memoService.createMemo(requestDto, request);
+    public MemoResponseDto createMemo(@RequestBody MemoRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return memoService.createMemo(requestDto, userDetails.getUser());
     }
 
     @GetMapping("/api/memos")//전체 조회//주소가 똑같아도 방식(get,post)달라서 주소 같아도 됨(?)
@@ -40,13 +42,13 @@ public class MemoController {
 
 
     @PutMapping("/api/memos/{id}")//수정
-    public Memo updateMemo(@PathVariable Long id,@RequestBody MemoRequestDto requestDto, HttpServletRequest request){
-        return memoService.update(id, requestDto, request);//필요한 값을 넣어줌(id, requestDto)
+    public MemoResponseDto updateMemo(@PathVariable Long id,@RequestBody MemoRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return memoService.update(id, requestDto, userDetails.getUser());//필요한 값을 넣어줌(id, requestDto)
     }
 
     @DeleteMapping("/api/memos/{id}")//삭제
-    public String deleteMemo(@PathVariable Long id,HttpServletRequest request){
-        return memoService.deleteMemo(id,request);
+    public String deleteMemo(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return memoService.deleteMemo(id, userDetails.getUser());
     }
 
 

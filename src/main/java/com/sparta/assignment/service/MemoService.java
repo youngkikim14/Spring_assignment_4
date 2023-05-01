@@ -29,26 +29,26 @@ public class MemoService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public Memo createMemo(MemoRequestDto requestDto, HttpServletRequest request) { //토큰값 가져와서 검증
-        String token = jwtUtil.resolveToken(request); //토큰값
-        Claims claims;
-
-        if (token != null) {
-            if (jwtUtil.validateToken(token)) {
-                claims = jwtUtil.getUserInfoFromToken(token); //토큰으로 사용자 정보 가져오기
-            } else {
-                throw new IllegalArgumentException("Token Erro"); // 에러표시
-            }
-            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow( //토큰이 맞으면 토큰으로 db에서 사용자 정보 조회
-                    () -> new IllegalArgumentException("없는 유저입니다")
-            );
+    public MemoResponseDto createMemo(MemoRequestDto requestDto, User user) { //토큰값 가져와서 검증
+//        String token = jwtUtil.resolveToken(request); //토큰값
+//        Claims claims;
+//
+//        if (token != null) {
+//            if (jwtUtil.validateToken(token)) {
+//                claims = jwtUtil.getUserInfoFromToken(token); //토큰으로 사용자 정보 가져오기
+//            } else {
+//                throw new IllegalArgumentException("Token Erro"); // 에러표시
+//            }
+//            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow( //토큰이 맞으면 토큰으로 db에서 사용자 정보 조회
+//                    () -> new IllegalArgumentException("없는 유저입니다")
+//            );
             Memo memo = new Memo(requestDto, user.getUsername());
             memoRepository.saveAndFlush(memo);
 
-            return memo;
-        } else {
-            return null;
-        }
+            return new MemoResponseDto(memo);
+//        } else {
+//            return null;
+//        }
     }
 
     @Transactional(readOnly = true) //전체 글 조회
@@ -56,9 +56,9 @@ public class MemoService {
         List<Memo> memos = memoRepository.findAllByOrderByModifiedAtDesc();
         List<MemoResponseDto> memoResponseDtos = new ArrayList<>();
         for (Memo memo: memos) {
-            for (Comment comment: memo.getComments()) {
-                String commentcontent = comment.getContents();
-            }
+//            for (Comment comment: memo.getComments()) {
+//                String commentcontent = comment.getContents();
+//            }
             memoResponseDtos.add(new MemoResponseDto(memo));
         }
         return memoResponseDtos;
@@ -78,48 +78,46 @@ public class MemoService {
 
 
     @Transactional
-    public Memo update(Long id, MemoRequestDto requestDto, HttpServletRequest request) {
-        String token = jwtUtil.resolveToken(request); //토큰값
-        Claims claims;
-
-        if (token != null) {
-            if (jwtUtil.validateToken(token)) {
-                claims = jwtUtil.getUserInfoFromToken(token); //토큰으로 사용자 정보 가져오기
-            } else {
-                throw new IllegalArgumentException("Token Erro"); // 에러표시
-            }
-            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow( //토큰이 맞으면 토큰으로 db에서 사용자 정보 조회
-                    () -> new IllegalArgumentException("없는 유저입니다")
-            );
+    public MemoResponseDto update(Long id, MemoRequestDto requestDto, User user) {
+//        String token = jwtUtil.resolveToken(request); //토큰값
+//        Claims claims;
+//
+//        if (token != null) {
+//            if (jwtUtil.validateToken(token)) {
+//                claims = jwtUtil.getUserInfoFromToken(token); //토큰으로 사용자 정보 가져오기
+//            } else {
+//                throw new IllegalArgumentException("Token Erro"); // 에러표시
+//            }
+//            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow( //토큰이 맞으면 토큰으로 db에서 사용자 정보 조회
+//                    () -> new IllegalArgumentException("없는 유저입니다")
+//            );
             Memo memo = memoRepository.findById(id).orElseThrow( // 없는 글 null 처리
                     () -> new NullPointerException("존재하지 않은 게시글입니다.")
             );
             UserRoleEnum userRoleEnum = user.getUserRoleEnum();
             if (user.getUsername().equals(memo.getUsername()) || userRoleEnum == UserRoleEnum.ADMIN){
                 memo.update(requestDto, user.getUsername());
-                return memo;
+                return new MemoResponseDto(memo);
             } else {
                 throw new IllegalArgumentException("권한이 없습니다");
                     }
-        } else {
-            return null;
         }
-    }
+
 
     @Transactional
-    public String deleteMemo(Long id, HttpServletRequest request) {
-        String token = jwtUtil.resolveToken(request); //토큰값
-        Claims claims;
-
-        if (token != null) {
-            if (jwtUtil.validateToken(token)) {
-                claims = jwtUtil.getUserInfoFromToken(token); //토큰으로 사용자 정보 가져오기
-            } else {
-                throw new IllegalArgumentException("Token Erro"); // 에러표시
-            }
-            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow( //토큰이 맞으면 토큰으로 db에서 사용자 정보 조회
-                    () -> new IllegalArgumentException("없는 유저입니다")
-            );
+    public String deleteMemo(Long id, User user) {
+//        String token = jwtUtil.resolveToken(request); //토큰값
+//        Claims claims;
+//
+//        if (token != null) {
+//            if (jwtUtil.validateToken(token)) {
+//                claims = jwtUtil.getUserInfoFromToken(token); //토큰으로 사용자 정보 가져오기
+//            } else {
+//                throw new IllegalArgumentException("Token Erro"); // 에러표시
+//            }
+//            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow( //토큰이 맞으면 토큰으로 db에서 사용자 정보 조회
+//                    () -> new IllegalArgumentException("없는 유저입니다")
+//            );
             Memo memo = memoRepository.findById(id).orElseThrow( // 없는 글 null 처리
                     () -> new NullPointerException("존재하지 않은 게시글입니다.")
             );
@@ -130,8 +128,6 @@ public class MemoService {
             } else {
                 throw new IllegalArgumentException("권한이 없습니다");
             }
-        } else {
-            return null;
         }
     }
-}
+

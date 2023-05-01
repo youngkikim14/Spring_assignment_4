@@ -29,7 +29,7 @@ public class Memo extends Timestamped {
     @Column(nullable = false)
     private String contents;
 
-    @OneToMany (mappedBy = "memo", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany (mappedBy = "memo", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @OrderBy("modifiedAt DESC")
     @JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
